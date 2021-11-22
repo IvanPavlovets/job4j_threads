@@ -25,4 +25,4 @@ env:
 
   global:
 
-  - CODECOV_TOKEN=""
+  - CODECOV_TOKEN="dcb927e8-b7d6-4134-8571-02ef0c56b787"
