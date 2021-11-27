@@ -1,6 +1,6 @@
 package ru.job4j.concurrent;
 
-public class MultithreadThing implements Runnable{
+public class MultithreadThing implements Runnable {
     int number;
 
     public MultithreadThing(int number) {
