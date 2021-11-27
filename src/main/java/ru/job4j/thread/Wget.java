@@ -13,8 +13,8 @@ import java.net.URL;
  * счет Thread.sleep. Пауза вычисляеться - (speed - timeDelay).
  */
 public class Wget implements Runnable {
-    String url;
-    int speed;
+    private String url;
+    private int speed;
 
     public Wget(String url, int speed) {
         this.url = url;
@@ -52,5 +52,6 @@ public class Wget implements Runnable {
         Thread wget = new Thread(new Wget(url, speed));
         wget.start();
         wget.join();
+
     }
 }
