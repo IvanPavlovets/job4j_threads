@@ -17,17 +17,21 @@ public class ConsoleProgress implements Runnable {
                 count = (count + 1) % process.length;
                 Thread.sleep(500);
             } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
+                e.fillInStackTrace();
             }
         }
 
     }
 
-    public static void main(String[] args) throws InterruptedException {
-        Thread progress = new Thread(new ConsoleProgress());
-        progress.start();
-        Thread.sleep(8000);
-        progress.interrupt();
-        System.out.println("\n\rMain");
+    public static void main(String[] args) {
+        try {
+            Thread progress = new Thread(new ConsoleProgress());
+            progress.start();
+            Thread.sleep(8000);
+            progress.interrupt();
+            System.out.println("\nLoading has been completed");
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
     }
 }
