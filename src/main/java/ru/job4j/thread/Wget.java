@@ -57,7 +57,7 @@ public class Wget implements Runnable {
                         timeSleep = 1000 - deltaTime;
                         Thread.sleep(timeSleep);
                     }
-                    System.out.printf("%d bytesWrited: %d deltaTime: %d %s",i++ , bytesWrited, deltaTime, "\n");
+                    System.out.printf("%d bytesWrited: %d deltaTime: %d %s", i++, bytesWrited, deltaTime, "\n");
                     tCount = 0;
                     bytesWrited = 0;
                 }
@@ -93,7 +93,6 @@ public class Wget implements Runnable {
         Thread wget = new Thread(new Wget(url, urlOut, bytesPerSecond));
         wget.start();
         wget.join();
-
     }
 
     /**
