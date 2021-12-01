@@ -24,32 +24,52 @@ public class Wget implements Runnable {
     }
 
     /**
-     * код для скачивания файла с задержкой до 1 мегабайта в секунду.
+     * Код для скачивания файла с задержкой до 1 мегабайта в секунду.
+     * время задержки вычисляеться как разница t2 - t1,
+     * затем задержка аккумулируется в tCount.
+     * Затем после набора количества проч./запис. байт в bytesWrited
+     * >= пропускной способности speed идет вычисление задержки,
+     * остатка от секунды = 1000.
      */
     @Override
     public void run() {
+        long startLoading = System.currentTimeMillis();
+        int i = 1;
+        long t1 = 0;
+        long t2 = 0;
+        long tCount = 0;
         try (BufferedInputStream in = new BufferedInputStream(new URL(url).openStream());
              FileOutputStream out = new FileOutputStream(urlOut)) {
             byte[] dataBuffer = new byte[1024];
-            int bytesRead;
+            int bytesRead = 0;
             long bytesWrited = 0;
             long deltaTime;
-            long startLoading = System.currentTimeMillis();
-            do {
+            long timeSleep;
+            while (bytesRead != -1) {
+                tCount = tCount + (t2 - t1);
+                t1 = System.currentTimeMillis();
                 bytesRead = in.read(dataBuffer, 0, 1024);
                 bytesWrited = bytesWrited + bytesRead;
-                out.write(dataBuffer, 0, 1024);
+                out.write(dataBuffer, 0, bytesRead);
                 if (bytesWrited >= speed) {
-                    deltaTime = System.currentTimeMillis() - startLoading;
+                    deltaTime = tCount;
                     if (deltaTime < 1000) {
-                        Thread.sleep(1000 - deltaTime);
+                        timeSleep = 1000 - deltaTime;
+                        Thread.sleep(timeSleep);
                     }
+                    System.out.printf("%d bytesWrited: %d deltaTime: %d %s",i++ , bytesWrited, deltaTime, "\n");
+                    tCount = 0;
+                    bytesWrited = 0;
                 }
-            } while (bytesRead != -1);
+                t2 = System.currentTimeMillis();
+            }
         } catch (Exception e) {
             Thread.currentThread().interrupt();
             e.fillInStackTrace();
         }
+        long endLoading = System.currentTimeMillis();
+        long finisTime = endLoading - startLoading;
+        System.out.printf("totalTime: %.2f", ((double) (finisTime)) / 1000);
     }
 
     /**
@@ -61,7 +81,7 @@ public class Wget implements Runnable {
      * - это 1048576 байт в секунду.
      * КБайт - 1024 байта.
      * МБайт - 1024 килобайта.
-     * @param args
+     * @param args аргументы для ввода с консоли
      * @throws InterruptedException
      */
     public static void main(String[] args) throws InterruptedException {
@@ -76,6 +96,15 @@ public class Wget implements Runnable {
 
     }
 
+    /**
+     * Валидатор ввода. Пример ввода аргументов для консоли:
+     * "https://proof.ovh.net/files/10Mb.dat" "targetPath" 1048576
+     * 1 арг - пример сохраняемого файла,
+     * 2 арг - путь к файлу в директории,
+     * 3 арг - скорость байт в секунду (1048576 байт - 10 сек,
+     * 2097152 байт - 5 сек)
+     * @param args - 3 аргумента валидатора
+     */
     private static void validateArgsCount(String[] args) {
         if (args.length < 3) {
             throw new IllegalArgumentException("there must be 3 arguments!");
