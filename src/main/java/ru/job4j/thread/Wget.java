@@ -43,7 +43,6 @@ public class Wget implements Runnable {
             byte[] dataBuffer = new byte[1024];
             int bytesRead = 0;
             long bytesWrited = 0;
-            long deltaTime;
             long timeSleep;
             while (bytesRead != -1) {
                 tCount = tCount + (t2 - t1);
@@ -52,12 +51,11 @@ public class Wget implements Runnable {
                 bytesWrited = bytesWrited + bytesRead;
                 out.write(dataBuffer, 0, bytesRead);
                 if (bytesWrited >= speed) {
-                    deltaTime = tCount;
-                    if (deltaTime < 1000) {
-                        timeSleep = 1000 - deltaTime;
+                    if (tCount < 1000) {
+                        timeSleep = 1000 - tCount;
                         Thread.sleep(timeSleep);
                     }
-                    System.out.printf("%d bytesWrited: %d deltaTime: %d %s", i++, bytesWrited, deltaTime, "\n");
+                    System.out.printf("%d bytesWrited: %d deltaTime: %d %s", i++, bytesWrited, tCount, "\n");
                     tCount = 0;
                     bytesWrited = 0;
                 }
