@@ -25,49 +25,43 @@ public class Wget implements Runnable {
 
     /**
      * Код для скачивания файла с задержкой до 1 мегабайта в секунду.
-     * время задержки вычисляеться как разница t2 - t1,
-     * затем задержка аккумулируется в tCount.
+     * время задержки вычисляеться в deltaTime.
      * Затем после набора количества проч./запис. байт в bytesWrited
      * >= пропускной способности speed идет вычисление задержки,
      * остатка от секунды = 1000.
      */
     @Override
     public void run() {
-        long startLoading = System.currentTimeMillis();
         int i = 1;
-        long t1 = 0;
-        long t2 = 0;
-        long tCount = 0;
         try (BufferedInputStream in = new BufferedInputStream(new URL(url).openStream());
              FileOutputStream out = new FileOutputStream(urlOut)) {
+            long startLoading = System.currentTimeMillis();
+            long countTime = startLoading;
+            long deltaTime;
             byte[] dataBuffer = new byte[1024];
             int bytesRead = 0;
             long bytesWrited = 0;
-            long timeSleep;
             while (bytesRead != -1) {
-                tCount = tCount + (t2 - t1);
-                t1 = System.currentTimeMillis();
                 bytesRead = in.read(dataBuffer, 0, 1024);
                 bytesWrited = bytesWrited + bytesRead;
-                out.write(dataBuffer, 0, bytesRead);
+                out.write(dataBuffer, 0, 1024);
                 if (bytesWrited >= speed) {
-                    if (tCount < 1000) {
-                        timeSleep = 1000 - tCount;
-                        Thread.sleep(timeSleep);
+                    deltaTime = System.currentTimeMillis() - countTime;
+                    if (deltaTime < 1000) {
+                        Thread.sleep(1000 - deltaTime);
                     }
-                    System.out.printf("%d bytesWrited: %d deltaTime: %d %s", i++, bytesWrited, tCount, "\n");
-                    tCount = 0;
+                    System.out.printf("%d bytesWrited: %d deltaTime: %d %s", i++, bytesWrited, deltaTime, "\n");
                     bytesWrited = 0;
+                    countTime = System.currentTimeMillis();
                 }
-                t2 = System.currentTimeMillis();
             }
+            long endLoading = System.currentTimeMillis();
+            long finisTime = endLoading - startLoading;
+            System.out.printf("totalTime: %.2f", ((double) (finisTime)) / 1000);
         } catch (Exception e) {
             Thread.currentThread().interrupt();
             e.fillInStackTrace();
         }
-        long endLoading = System.currentTimeMillis();
-        long finisTime = endLoading - startLoading;
-        System.out.printf("totalTime: %.2f", ((double) (finisTime)) / 1000);
     }
 
     /**
