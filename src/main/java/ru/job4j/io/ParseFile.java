@@ -1,47 +1,43 @@
 package ru.job4j.io;
 
 import java.io.*;
+import java.util.function.Predicate;
 
 /**
  * Класс парсер файла.
  */
-public class ParseFile {
-    private File file;
+public final class ParseFile {
+    private final File file;
 
-    public synchronized void setFile(File f) {
-        this.file = f;
+    public ParseFile(File file) {
+        this.file = file;
     }
 
-    public synchronized File getFile() {
-        return file;
+    public String getContent() {
+        return parse(integer -> true);
     }
 
-    public String getContent() throws IOException {
-        InputStream i = new FileInputStream(file);
-        String output = "";
-        int data;
-        while ((data = i.read()) > 0) {
-            output += (char) data;
-        }
-        return output;
+    public String getContentWithoutUnicode() {
+        return parse(integer -> integer < 0x80);
     }
 
-    public String getContentWithoutUnicode() throws IOException {
-        InputStream i = new FileInputStream(file);
-        String output = "";
-        int data;
-        while ((data = i.read()) > 0) {
-            if (data < 0x80) {
-                output += (char) data;
+    /**
+     * Внутрений метод парсинга файла по условию.
+     * @param filter
+     * @return String
+     */
+    private String parse(Predicate<Integer> filter) {
+        StringBuilder output = new StringBuilder();
+        try (BufferedInputStream in = new BufferedInputStream(new FileInputStream(file))) {
+            int data;
+            while ((data = in.read()) > 0) {
+                if (filter.test(data)) {
+                    output.append((char) data);
+                }
             }
+        } catch (Exception e) {
+            e.fillInStackTrace();
         }
-        return output;
-    }
-
-    public void saveContent(String content) throws IOException {
-        OutputStream o = new FileOutputStream(file);
-        for (int i = 0; i < content.length(); i += 1) {
-            o.write(content.charAt(i));
-        }
+        return output.toString();
     }
 }
