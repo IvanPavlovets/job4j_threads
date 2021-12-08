@@ -15,7 +15,7 @@ public final class FileSever {
      * Сохраняет строку в файл.
      * @param content
      */
-    public void saveContent(String content) {
+    public synchronized void saveContent(String content) {
         try (BufferedOutputStream output = new BufferedOutputStream(new FileOutputStream(urlOut))) {
             for (int i = 0; i < content.length(); i += 1) {
                 output.write(content.charAt(i));

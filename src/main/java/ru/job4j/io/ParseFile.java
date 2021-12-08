@@ -13,11 +13,11 @@ public final class ParseFile {
         this.file = file;
     }
 
-    public String getContent() {
+    public synchronized String getContent() {
         return parse(integer -> true);
     }
 
-    public String getContentWithoutUnicode() {
+    public synchronized String getContentWithoutUnicode() {
         return parse(integer -> integer < 0x80);
     }
 
@@ -26,7 +26,7 @@ public final class ParseFile {
      * @param filter
      * @return String
      */
-    private String parse(Predicate<Integer> filter) {
+    private synchronized String parse(Predicate<Integer> filter) {
         StringBuilder output = new StringBuilder();
         try (BufferedInputStream in = new BufferedInputStream(new FileInputStream(file))) {
             int data;
