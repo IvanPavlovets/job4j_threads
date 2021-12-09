@@ -1,14 +1,21 @@
 package ru.job4j;
 
+import net.jcip.annotations.GuardedBy;
+import net.jcip.annotations.ThreadSafe;
+
 /**
- * Илюстрация проблемы видимости.
+ * Илюстрация проблемы видимости и проблемы гонок.
  * Методы get и increase могут быть вызваны параллельно из разных нитей.
  * В этом случае одна нить увеличит счетчик, а вторая эти данные не успеет прочитать.
  * Такая ситуация называется проблемой видимости (visilibity).
  * Чтобы обе нити видели изменения друг другая с общими ресурсами
  * нужно работать только в критической секции.
+ * в аннотации @GuardedBy("this") - в скобках указываем обьект монитора.
+ * Тот обьект по которому проверяем что работаем в критической секции.
  */
+@ThreadSafe
 public class Count {
+    @GuardedBy("this")
     private int value;
 
     /**
@@ -25,7 +32,7 @@ public class Count {
      * других нитей и могут быть проблемы видимости (visilibity).
      * @return int
      */
-    public int get() {
+    public synchronized int get() {
         return value;
     }
 }
