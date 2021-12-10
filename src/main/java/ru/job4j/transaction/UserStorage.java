@@ -68,9 +68,8 @@ public class UserStorage {
 
     @Override
     public String toString() {
-        return "UserStorage{" +
-                "users=" + users +
-                '}';
+        return "UserStorage{"
+                + "users=" + users + '}';
     }
 
     public static void main(String[] args) {
