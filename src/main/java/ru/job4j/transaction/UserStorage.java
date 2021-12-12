@@ -34,7 +34,7 @@ public class UserStorage {
      * @return boolean
      */
     public synchronized boolean update(User user) {
-        return users.replace(user.getId(), user) != null;
+        return users.replace(user.getId(), users.get(user.getId()), user);
     }
 
     /**
@@ -44,7 +44,7 @@ public class UserStorage {
      * @return
      */
     public synchronized boolean delete(User user) {
-        return users.remove(user.getId()) != null;
+        return users.remove(user.getId(), user);
     }
 
     /**
@@ -58,16 +58,16 @@ public class UserStorage {
     public synchronized void transfer(int fromId, int toId, int amount) {
         User from = users.get(fromId);
         User to = users.get(toId);
-        if ((from != null) || (to != null) || (from.getAmount() - amount) >= 0) {
-            users.replace(fromId, new User(fromId, from.getAmount() - amount));
-            users.replace(toId, new User(toId, to.getAmount() + amount));
+        if ((from != null) && (to != null) && (from.getAmount() - amount) >= 0) {
+            from.setAmount(from.getAmount() - amount);
+            to.setAmount(to.getAmount() + amount);
         } else {
             System.out.println("Несуществующий id User-а или не хватает денег на счете.");
         }
     }
 
     @Override
-    public String toString() {
+    public synchronized String toString() {
         return "UserStorage{"
                 + "users=" + users + '}';
     }
@@ -79,13 +79,17 @@ public class UserStorage {
 
         storage.transfer(2, 1, 150);
 
-        System.out.println(storage);
+        System.out.println("transfer: " + storage);
 
         User removed = new User(1, 1000);
 
-        System.out.println(storage.delete(removed));
+        System.out.println("deleted: " + storage.delete(removed));
         storage.add(new User(3, 400));
         storage.transfer(3, 2, 100);
-        System.out.println(storage);
+        System.out.println("delete: " + storage);
+
+        User updated = new User(2, 1000);
+        storage.update(updated);
+        System.out.println("update: " + storage);
     }
 }
