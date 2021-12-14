@@ -10,7 +10,6 @@ public class CountingThred implements Runnable {
     @Override
     public void run() {
         barrier.await();
-        System.out.println(Thread.currentThread().getName() + " thread is working");
     }
 
 }

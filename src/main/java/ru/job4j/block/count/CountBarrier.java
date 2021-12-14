@@ -21,7 +21,6 @@ public class CountBarrier {
     public void count() {
         synchronized (monitor) {
             count++;
-            System.out.println(Thread.currentThread().getName() + " count: " + count);
             notifyAll();
         }
     }
@@ -36,9 +35,7 @@ public class CountBarrier {
     public void await() {
         synchronized (monitor) {
             try {
-                count();
                 while (count < total) {
-                    System.out.println(Thread.currentThread().getName() + " wait");
                     monitor.wait();
                 }
             } catch (InterruptedException e) {
