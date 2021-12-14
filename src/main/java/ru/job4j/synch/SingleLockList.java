@@ -39,7 +39,7 @@ public class SingleLockList<T> implements Iterable<T> {
      * @param list
      * @return List<T>
      */
-    private List<T> copy(List<T> list) {
+    private synchronized List<T> copy(List<T> list) {
         List<T> deepCopy = new ArrayList<>();
         for (T element : list) {
             deepCopy.add(element);
