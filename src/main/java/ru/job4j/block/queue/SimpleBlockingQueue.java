@@ -36,17 +36,12 @@ public class SimpleBlockingQueue<T> {
      * то при попытке добавления поток Producer блокируется,
      * до тех пор пока Consumer не извлечет очередные данные
      */
-    public synchronized void offer(T value) {
-        try {
-            while (queue.size() >= max) {
-                wait();
-            }
-            queue.offer(value);
-            notifyAll();
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-            e.printStackTrace();
+    public synchronized void offer(T value) throws InterruptedException {
+        while (queue.size() >= max) {
+            wait();
         }
+        queue.offer(value);
+        notifyAll();
     }
 
     /**
@@ -57,18 +52,13 @@ public class SimpleBlockingQueue<T> {
      * до тех пор пока Producer не поместит в очередь данные.
      * @return T
      */
-    public synchronized T poll() {
-        T element = null;
-        try {
-            while (queue.isEmpty()) {
-                wait();
-            }
-            element = queue.poll();
-            notifyAll();
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-            e.printStackTrace();
+    public synchronized T poll() throws InterruptedException {
+        T element;
+        while (queue.isEmpty()) {
+            wait();
         }
+        element = queue.poll();
+        notifyAll();
         return element;
     }
 }

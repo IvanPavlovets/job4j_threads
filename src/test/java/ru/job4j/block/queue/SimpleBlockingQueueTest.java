@@ -21,7 +21,12 @@ public class SimpleBlockingQueueTest {
         SimpleBlockingQueue<Integer> queue = new SimpleBlockingQueue(3);
         Thread consumer = new Thread(
                 () -> {
-                    queue.poll();
+                    try {
+                        queue.poll();
+                    } catch (InterruptedException e) {
+                        Thread.currentThread().interrupt();
+                        e.printStackTrace();
+                    }
                     assertEquals(Thread.currentThread().getState(), Thread.State.WAITING);
                 }
         );
@@ -40,10 +45,15 @@ public class SimpleBlockingQueueTest {
         SimpleBlockingQueue<Integer> queue = new SimpleBlockingQueue(3);
         Thread producer = new Thread(
                 () -> {
+                    try {
                         queue.offer(10);
                         queue.offer(20);
                         queue.offer(30);
                         queue.offer(40);
+                    } catch (InterruptedException e) {
+                        Thread.currentThread().interrupt();
+                        e.printStackTrace();
+                    }
                     assertEquals(Thread.currentThread().getState(), Thread.State.WAITING);
                 }
         );
@@ -64,18 +74,28 @@ public class SimpleBlockingQueueTest {
         SimpleBlockingQueue<Integer> queue = new SimpleBlockingQueue(3);
         Thread producer = new Thread(
                 () -> {
-                    queue.offer(10);
-                    queue.offer(20);
-                    queue.offer(30);
-                    queue.offer(40);
+                    try {
+                        queue.offer(10);
+                        queue.offer(20);
+                        queue.offer(30);
+                        queue.offer(40);
+                    } catch (InterruptedException e) {
+                        Thread.currentThread().interrupt();
+                        e.printStackTrace();
+                    }
                 }
         );
         Thread consumer = new Thread(
                 () -> {
-                    result.add(queue.poll());
-                    result.add(queue.poll());
-                    result.add(queue.poll());
-                    result.add(queue.poll());
+                    try {
+                        result.add(queue.poll());
+                        result.add(queue.poll());
+                        result.add(queue.poll());
+                        result.add(queue.poll());
+                    } catch (InterruptedException e) {
+                        Thread.currentThread().interrupt();
+                        e.printStackTrace();
+                    }
                 }
         );
         producer.start();
