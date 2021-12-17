@@ -61,4 +61,12 @@ public class SimpleBlockingQueue<T> {
         notifyAll();
         return element;
     }
+
+    /**
+     * Проверяем пуста ли внутреняя очередь.
+     * @return boolean
+     */
+    public synchronized boolean isEmpty() {
+        return queue.isEmpty();
+    }
 }

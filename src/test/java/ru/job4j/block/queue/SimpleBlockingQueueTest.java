@@ -3,7 +3,10 @@ package ru.job4j.block.queue;
 import org.junit.Test;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.stream.IntStream;
 
 import static org.junit.Assert.*;
 
@@ -105,4 +108,57 @@ public class SimpleBlockingQueueTest {
         assertEquals(result, expected);
     }
 
+    /**
+     * 1) В тесте - главная нить main ждет выполнение других нитей (producer и conumer).
+     * Также обеспечиваеться последовательное выполнение потребителя и производителя
+     * это все достигаем с помощью:
+     * producer.join();
+     * consumer.interrupt();
+     * consumer.join();
+     * Сначала дожидаемся завершения работы производителя.
+     * Далее посылаем сигнал, что потребителю можно остановиться.
+     * Ждем пока потребитель прочитает все данные и завершит свою работу.
+     * 2) Двойна проверка в цикле -  проверяем, что очередь пустая или нить выключили.
+     * Зачем - Если производитель закончил свою работу и сразу подаст сигнал
+     * об отключении потребителя, то мы не сможем прочитать все данные.
+     * Решение - мы успели прочитать все данные и находимся в режиме wait пришедший
+     * сигнал запустит нить и проверит состояние очереди и завершит цикл.
+     * @throws InterruptedException
+     */
+    @Test
+    public void whenFetchAllThenGetIt() throws InterruptedException {
+        final CopyOnWriteArrayList<Integer> buffer = new CopyOnWriteArrayList<>();
+        final SimpleBlockingQueue<Integer> queue = new SimpleBlockingQueue<>(6);
+        Thread producer = new Thread(
+                () -> {
+                    IntStream.range(0, 5).forEach(
+                            value -> {
+                                try {
+                                    queue.offer(value);
+                                } catch (InterruptedException e) {
+                                    e.printStackTrace();
+                                }
+                            }
+                    );
+                }
+        );
+        Thread conumer = new Thread(
+                () -> {
+                    while (!queue.isEmpty() || !Thread.currentThread().isInterrupted()) {
+                        try {
+                            buffer.add(queue.poll());
+                        } catch (InterruptedException e) {
+                            Thread.currentThread().interrupt();
+                        }
+                    }
+                }
+        );
+        producer.start();
+        conumer.start();
+        producer.join();
+        conumer.interrupt();
+        conumer.join();
+        assertEquals(buffer, Arrays.asList(0, 1, 2, 3, 4));
+
+    }
 }
