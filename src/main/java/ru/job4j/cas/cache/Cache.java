@@ -25,19 +25,19 @@ public class Cache {
      * Если version у модели и в кеше одинаковы, то можно
      * обновить (версию и прочие даные).
      * Если version отличаются нужно выкинуть исключение.
-     * a - key из memory.
-     * b - model из memory.
+     * key из memory.
+     * value - model из memory.
      * @param model
      * @return boolean
      */
     public boolean update(Base model) {
-        return memory.computeIfPresent(model.getId(), (a, b) -> {
-                    if (model.getVersion() != b.getVersion()) {
+        return memory.computeIfPresent(model.getId(), (key, value) -> {
+                    if (model.getVersion() != value.getVersion()) {
                         throw new OptimisticException("Версия model, в кеше и параметре, не совподают!");
                     }
-                    b.setVersion(b.getVersion() + 1);
-                    b.setName(model.getName());
-                    return b;
+                    value.setVersion(value.getVersion() + 1);
+                    value.setName(model.getName());
+                    return value;
                 }
         ) != null;
     }
