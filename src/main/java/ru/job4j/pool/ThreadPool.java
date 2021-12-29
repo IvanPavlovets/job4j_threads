@@ -7,12 +7,12 @@ import java.util.List;
 
 /**
  * Обьектный пул - набор инициализированых и готовых к исполнению обьектов.
- *  1) В каждую нить передается блокирующая очередь tasks.
- *  В методе run мы должны получить задачу из очереди tasks.
- *  2) Если в очереди нет элементов, то нить переводиться
- *  в состоянии Thread.State.WAITING.
- *  3) Когда приходит новая задача, всем нитям в состоянии
- *  Thread.State.WAITING посылается сигнал проснуться и начать работу.
+ * 1) В каждую нить передается блокирующая очередь tasks.
+ * В методе run мы должны получить задачу из очереди tasks.
+ * 2) Если в очереди нет элементов, то нить переводиться
+ * в состоянии Thread.State.WAITING.
+ * 3) Когда приходит новая задача, всем нитям в состоянии
+ * Thread.State.WAITING посылается сигнал проснуться и начать работу.
  */
 public class ThreadPool {
     /**
@@ -29,27 +29,34 @@ public class ThreadPool {
      */
     private final SimpleBlockingQueue<Runnable> tasks = new SimpleBlockingQueue<>(SIZE);
 
+
     /**
-     *  метод добавляет задачи в блокирующую очередь tasks.
-     * @param job - задача для одной нити.
+     * В конструкторе происходит инициализация списка потоков.
+     * В каждую нить передается блокирующая очередь tasks.
+     * В методе run мы должны получить задачу из очереди tasks.
      */
-    public void work(Runnable job) throws InterruptedException {
-        if (threads.isEmpty()) {
-            initPool(job);
-        }
-        for (int i = 0; threads.size() != 0; i++) {
-            tasks.offer(threads.get(i));
+    public ThreadPool() {
+        for (int i = 0; i < SIZE; i++) {
+                threads.add(new Thread(
+                        () -> {
+                            try {
+                                tasks.poll();
+                            } catch (InterruptedException e) {
+                                e.printStackTrace();
+                            }
+                        }
+                ));
         }
     }
 
     /**
-     * Инициализация списка нитей.
-     * @param job
+     * Метод добавляет задачи job в блокирующую очередь tasks.
+     * Добавляет задачи клиент - тот кто использует пул потоков.
+     * @param job - задача для одной нити.
      */
-    private void initPool(Runnable job) {
-        Thread thread = new Thread(job);
-        for (int i = 0; i < SIZE; i++) {
-            threads.add(thread);
+    public void work(Runnable job) throws InterruptedException {
+        for (int i = 0; threads.size() != 0; i++) {
+            tasks.offer(job);
         }
     }
 
@@ -57,7 +64,7 @@ public class ThreadPool {
      * метод завершит все запущенные задачи.
      */
     public void shutdown() {
-        threads.stream().forEach(thread -> thread.interrupt());
+        threads.forEach(thread -> thread.interrupt());
     }
 
 }
