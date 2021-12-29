@@ -13,6 +13,7 @@ import java.util.List;
  * в состоянии Thread.State.WAITING.
  * 3) Когда приходит новая задача, всем нитям в состоянии
  * Thread.State.WAITING посылается сигнал проснуться и начать работу.
+ * Смотри пример http://tutorials.jenkov.com/java-concurrency/thread-pools.html
  */
 public class ThreadPool {
     /**
@@ -29,24 +30,28 @@ public class ThreadPool {
      */
     private final SimpleBlockingQueue<Runnable> tasks = new SimpleBlockingQueue<>(SIZE);
 
-
     /**
      * В конструкторе происходит инициализация списка потоков.
      * В каждую нить передается блокирующая очередь tasks.
      * В методе run мы должны получить задачу из очереди tasks.
+     * job - это наша работа которую мы положили в tasks, в методе work.
      */
     public ThreadPool() {
         for (int i = 0; i < SIZE; i++) {
-                threads.add(new Thread(
-                        () -> {
-                            try {
-                                tasks.poll();
-                            } catch (InterruptedException e) {
-                                e.printStackTrace();
+            threads.add(new Thread(
+                    () -> {
+                        try {
+                            while (!Thread.currentThread().isInterrupted()) {
+                                Runnable job = tasks.poll();
+                                job.run();
                             }
+                        } catch (InterruptedException e) {
+                            Thread.currentThread().interrupt();
                         }
-                ));
+                    }
+            ));
         }
+        threads.forEach(thread -> thread.start());
     }
 
     /**
@@ -55,9 +60,7 @@ public class ThreadPool {
      * @param job - задача для одной нити.
      */
     public void work(Runnable job) throws InterruptedException {
-        for (int i = 0; threads.size() != 0; i++) {
-            tasks.offer(job);
-        }
+        tasks.offer(job);
     }
 
     /**
@@ -65,6 +68,28 @@ public class ThreadPool {
      */
     public void shutdown() {
         threads.forEach(thread -> thread.interrupt());
+    }
+
+    /**
+     * в main вызываем work и передаем job в аргумент, в виде lambda
+     * вывести имя нити и номер задачи (job).
+     * Задачи вытаскиваються нитями из очереди каждый раз в разном порядке.
+     * @param args
+     */
+    public static void main(String[] args) {
+        ThreadPool pool = new ThreadPool();
+        for (int i = 1; i < 11; i++) {
+            int jobNumber = i;
+            try {
+                pool.work(() -> System.out.println(
+                        Thread.currentThread().getName() + " job: " + jobNumber)
+                );
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+                Thread.currentThread().interrupt();
+            }
+        }
+        pool.shutdown();
     }
 
 }
