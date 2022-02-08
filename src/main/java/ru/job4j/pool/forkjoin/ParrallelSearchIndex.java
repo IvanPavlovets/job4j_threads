@@ -35,7 +35,7 @@ public class ParrallelSearchIndex<T> extends RecursiveTask<Integer> {
      */
     public static <T> int searchIndex(T[] arr, T element) {
         ForkJoinPool pool = new ForkJoinPool();
-        return (int) pool.invoke(new ParrallelSearchIndex(arr, element, 0, arr.length - 1));
+        return pool.invoke(new ParrallelSearchIndex<>(arr, element, 0, arr.length - 1));
     }
 
     /**
@@ -68,7 +68,7 @@ public class ParrallelSearchIndex<T> extends RecursiveTask<Integer> {
      */
     @Override
     protected Integer compute() {
-        if ((to + 1) - from <= 10) {
+        if (to - from <= 10) {
             return linearSearch(arr, element, from, to);
         }
         int mid = (from + to) / 2;
@@ -76,7 +76,7 @@ public class ParrallelSearchIndex<T> extends RecursiveTask<Integer> {
         ParrallelSearchIndex<T> rightSearch = new ParrallelSearchIndex<>(arr, element, mid + 1, to);
         leftSearch.fork();
         rightSearch.fork();
-        return (leftSearch.join() + rightSearch.join() + 1);
+        return Math.max(leftSearch.join(), rightSearch.join());
     }
 
 }
