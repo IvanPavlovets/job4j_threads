@@ -1,4 +1,4 @@
-package ru.job4j.pool;
+package ru.job4j.pool.threadpool;
 
 import ru.job4j.block.queue.SimpleBlockingQueue;
 
