@@ -215,15 +215,15 @@ public class CompletableFutureExample {
 
 
     public static void main(String[] args) throws Exception {
-        //CompletableFutureExample.runAsyncExample();
+        CompletableFutureExample.runAsyncExample();
         CompletableFutureExample.supplyAsyncExample();
-        //CompletableFutureExample.thenRunExample();
-        //CompletableFutureExample.thenAcceptExample();
-        //CompletableFutureExample.thenApplyExample();
-        //CompletableFutureExample.thenComposeExample();
-        //CompletableFutureExample.thenCombineExample();
-        //CompletableFutureExample.allOfExample();
-        //CompletableFutureExample.anyOfExample();
+        CompletableFutureExample.thenRunExample();
+        CompletableFutureExample.thenAcceptExample();
+        CompletableFutureExample.thenApplyExample();
+        CompletableFutureExample.thenComposeExample();
+        CompletableFutureExample.thenCombineExample();
+        CompletableFutureExample.allOfExample();
+        CompletableFutureExample.anyOfExample();
 
     }
 }
