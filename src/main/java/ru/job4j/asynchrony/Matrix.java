@@ -10,14 +10,14 @@ public class Matrix {
     /**
      * Возвращает массив с подсчитаными суммами всех диагоналей матрицы вида int[][].
      * В цикле мы запускаем две задачи. Одну с начала обхода, другую с конца.
+     * В первом getTask считаем суммы по главной диагонали.
+     * В цикле for считаем суммы по побочной диагонали.
      */
     public static int[] asyncSum(int[][] matrix) throws ExecutionException, InterruptedException {
         int n = matrix.length;
         int[] sums = new int[2 * n];
         Map<Integer, CompletableFuture<Integer>> futures = new HashMap<>();
-        // считаем суммы по главной диагонали
         futures.put(0, getTask(matrix, 0, n - 1, n - n, true));
-        // считаем суммы по побочной диагонали
         for (int k = 1; k <= n; k++) {
             futures.put(k, getTask(matrix, 0, k - 1, k - 1, false));
             if (k < n) {
